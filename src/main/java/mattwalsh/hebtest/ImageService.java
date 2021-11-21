@@ -1,13 +1,21 @@
 package mattwalsh.hebtest;
 
+import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.util.*;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
 
 @Component
 public class ImageService {
@@ -38,9 +46,9 @@ public class ImageService {
     }
 
 
-    public ImageResponse createImage(ImageRequest imageRequest) {
+    public ImageResponse processImageRequest(ImageRequest imageRequest) {
         UUID id = UUID.randomUUID();
-        byte[] imageData = new byte[] {}; // getBytesOrFail(imageRequest.getImage());
+        byte[] imageData = getBytesOrFail(imageRequest.getImage());
         String label = getLabel(imageRequest);
         String[] detectedObjects = getDetectedObjectsIfEnabled(imageRequest);
         ImageEntity newEntity = new ImageEntity(
@@ -53,21 +61,39 @@ public class ImageService {
         return newEntity.asImageResponse();
     }
 
+    // todo finish this
     private String getLabel(ImageRequest imageRequest) {
         return "IMAGE" + System.currentTimeMillis();
     }
 
+    // todo finish this
     private String[] getDetectedObjectsIfEnabled(ImageRequest imageRequest) {
         return DEFAULT_DETECTED_OBJECTS;
     }
 
-    private byte[] getBytesOrFail(MultipartFile image) {
+    private byte[] getBytesOrFail(String image) {
+        return imageAsFile(image)
+                .orElse(imageFromUrl(image)
+                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST)));
+    }
+
+    private Optional<byte[]> imageAsFile(String image) {
         try {
-            return image.getBytes();
-        } catch (IOException e) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Could not read image data.");
+            return Optional.of(Base64.getDecoder().decode(image));
+        } catch (IllegalArgumentException e){
+            return Optional.empty();
         }
     }
 
+    private Optional<byte[]> imageFromUrl(String image) {
+        try {
+            InputStream inputStream = new URL(image).openStream();
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+            byte[] byteArray = IOUtils.toByteArray(bufferedInputStream);
+            return Optional.of(byteArray);
+        } catch (IOException e) {
+            return Optional.empty();
+        }
+    }
 
 }

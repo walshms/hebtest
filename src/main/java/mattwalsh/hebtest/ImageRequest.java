@@ -1,11 +1,9 @@
 package mattwalsh.hebtest;
 
-import org.springframework.web.multipart.MultipartFile;
-
 public class ImageRequest {
 
     private boolean enableObjectDetection;
-    private MultipartFile image;
+    private String image;
 
     public boolean isEnableObjectDetection() {
         return enableObjectDetection;
@@ -15,11 +13,19 @@ public class ImageRequest {
         this.enableObjectDetection = enableObjectDetection;
     }
 
-    public MultipartFile getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(MultipartFile image) {
+    public void setImage(String image) {
         this.image = image;
+    }
+
+    @Override
+    public String toString() {
+        return "ImageRequest{" +
+                "enableObjectDetection=" + enableObjectDetection +
+                ", image='" + image + '\'' +
+                '}';
     }
 }
