@@ -24,6 +24,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+            <!--suppress MavenPackageUpdate -->
             <version>2.11.0</version>
         </dependency>
         <dependency>
