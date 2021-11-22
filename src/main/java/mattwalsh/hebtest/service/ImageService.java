@@ -48,38 +48,13 @@ public class ImageService {
 
 
     public ImageResponse processImageRequest(ImageRequest imageRequest) {
-        UUID id = UUID.randomUUID();
         byte[] imageData = getBytesOrFail(imageRequest.image());
         List<String> detectedObjects = getDetectedObjectsIfEnabled(imageRequest.enableObjectDetection(), imageData);
-        String checksum = ChecksumUtil.getChecksum(imageData);
-        String label = getLabel(imageRequest, detectedObjects, checksum);
         ImageEntity newEntity = new ImageEntity(
-                id,
                 imageData,
-                checksum,
-                label,
-                detectedObjects
-        );
+                imageRequest.label(),
+                detectedObjects);
         return this.imageRepository.save(newEntity).asImageResponse();
-    }
-
-    /**
-     * @param imageRequest the constructed image request from the front-end
-     * @return 1) provided label if exists
-     * 2) detected objects if enabled
-     * 3) checksum ???
-     */
-    private String getLabel(ImageRequest imageRequest,
-                            List<String> detectedObjects,
-                            String checksum) {
-        if (StringUtils.hasText(imageRequest.label())) {
-            return imageRequest.label();
-        }
-        return detectedObjects.stream()
-                .map(String::trim)
-                .filter(StringUtils::hasText)
-                .findFirst()
-                .orElse(checksum);
     }
 
     private List<String> getDetectedObjectsIfEnabled(boolean enableObjectDetection, byte[] imageData) {

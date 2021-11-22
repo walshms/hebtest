@@ -1,6 +1,8 @@
 package mattwalsh.hebtest.database;
 
+import mattwalsh.hebtest.ChecksumUtil;
 import mattwalsh.hebtest.rest.ImageResponse;
+import org.springframework.util.StringUtils;
 
 import javax.persistence.*;
 import java.util.List;
@@ -22,14 +24,27 @@ public class ImageEntity {
     public ImageEntity() {
     }
 
-    public ImageEntity(UUID id, byte[] imageData, String checksum, String label, List<String> detectedObjects) {
-        this.id = id;
+    public ImageEntity(byte[] imageData, String imageLabel, List<String> detectedObjects) {
+        this.id = UUID.randomUUID();
         this.imageData = imageData;
-        this.imageDataChecksum = checksum;
-        this.label = label;
+        this.imageDataChecksum = ChecksumUtil.getChecksum(imageData);
+        this.label = getLabel(imageLabel, detectedObjects, this.imageDataChecksum);
         this.detectedObjects = detectedObjects.stream()
                 .map(DetectedObjectEntity::new)
                 .toList();
+    }
+
+    private String getLabel(String label,
+                            List<String> detectedObjects,
+                            String checksum) {
+        if (StringUtils.hasText(label)) {
+            return label;
+        }
+        return detectedObjects.stream()
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .findFirst()
+                .orElse(checksum);
     }
 
     public ImageResponse asImageResponse() {

@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Component
-public class GoogleObjectDetectionService implements ObjectDetectionService {
+public class ImaggaObjectDetectionService implements ObjectDetectionService {
 
     @Override
     public Optional<List<String>> detectObjects(byte[] imageData) {
