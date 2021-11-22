@@ -1,13 +1,8 @@
 package mattwalsh.hebtest.database;
 
-import mattwalsh.hebtest.ChecksumUtil;
 import mattwalsh.hebtest.rest.ImageResponse;
 
 import javax.persistence.*;
-import javax.xml.bind.DatatypeConverter;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,18 +16,18 @@ public class ImageEntity {
     public byte[] imageData;
     public String imageDataChecksum;
     public String label;
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL)
     public List<DetectedObjectEntity> detectedObjects;
 
     public ImageEntity() {
     }
 
-    public ImageEntity(UUID id, byte[] imageData, String checksum, String label, String[] detectedObjects) {
+    public ImageEntity(UUID id, byte[] imageData, String checksum, String label, List<String> detectedObjects) {
         this.id = id;
         this.imageData = imageData;
         this.imageDataChecksum = checksum;
         this.label = label;
-        this.detectedObjects = Arrays.stream(detectedObjects)
+        this.detectedObjects = detectedObjects.stream()
                 .map(DetectedObjectEntity::new)
                 .toList();
     }

@@ -45,16 +45,11 @@ public class ImageController {
     }
 
     @PostMapping(value = "/images",
-            consumes = {MediaType.APPLICATION_JSON_VALUE},
-            produces = MediaType.APPLICATION_JSON_VALUE)
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     public ImageResponse postImage(@RequestBody ImageRequest imageRequest) {
         logger.info("found file: " + imageRequest.image());
         logger.info(imageRequest.toString());
         return this.imageService.processImageRequest(imageRequest);
-    }
-
-    private String getDefaultLabel() {
-        return "IMAGE_" + System.currentTimeMillis();
     }
 
 }

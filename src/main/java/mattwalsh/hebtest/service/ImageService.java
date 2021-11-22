@@ -1,15 +1,14 @@
 package mattwalsh.hebtest.service;
 
 import mattwalsh.hebtest.ChecksumUtil;
-import mattwalsh.hebtest.database.ImageRepository;
 import mattwalsh.hebtest.database.ImageEntity;
+import mattwalsh.hebtest.database.ImageRepository;
 import mattwalsh.hebtest.rest.ImageRequest;
 import mattwalsh.hebtest.rest.ImageResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 import org.springframework.web.server.ResponseStatusException;
 
@@ -19,13 +18,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
 
-import static java.lang.Boolean.FALSE;
-
 @Component
 public class ImageService {
-
-    private final static String[] DEFAULT_DETECTED_OBJECTS = {};
-    private final static Boolean DEFAULT_ENABLE_OBJECT_DETECTION = FALSE;
 
     @Autowired
     private final ObjectDetectionService objectDetectionService;
@@ -56,7 +50,7 @@ public class ImageService {
     public ImageResponse processImageRequest(ImageRequest imageRequest) {
         UUID id = UUID.randomUUID();
         byte[] imageData = getBytesOrFail(imageRequest.image());
-        String[] detectedObjects = getDetectedObjectsIfEnabled(imageRequest);
+        List<String> detectedObjects = getDetectedObjectsIfEnabled(imageRequest.enableObjectDetection(), imageData);
         String checksum = ChecksumUtil.getChecksum(imageData);
         String label = getLabel(imageRequest, detectedObjects, checksum);
         ImageEntity newEntity = new ImageEntity(
@@ -76,20 +70,28 @@ public class ImageService {
      * 3) checksum ???
      */
     private String getLabel(ImageRequest imageRequest,
-                            String[] detectedObjects,
+                            List<String> detectedObjects,
                             String checksum) {
-        if (FALSE.equals(ObjectUtils.isEmpty(imageRequest.label()))) {
+        if (StringUtils.hasText(imageRequest.label())) {
             return imageRequest.label();
-        } else if(FALSE.equals(ObjectUtils.isEmpty(detectedObjects))){
-            return detectedObjects[0];
-        } else {
-            return checksum;
         }
+        return detectedObjects.stream()
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .findFirst()
+                .orElse(checksum);
     }
 
-    // todo finish this
-    private String[] getDetectedObjectsIfEnabled(ImageRequest imageRequest) {
-        return DEFAULT_DETECTED_OBJECTS;
+    private List<String> getDetectedObjectsIfEnabled(boolean enableObjectDetection, byte[] imageData) {
+        if (enableObjectDetection) {
+            return objectDetectionService.detectObjects(imageData)
+                    .map(stringList -> stringList.stream()
+                            .map(String::trim)
+                            .filter(StringUtils::hasText)
+                            .toList())
+                    .orElse(Collections.emptyList());
+        }
+        return Collections.emptyList();
     }
 
     private byte[] getBytesOrFail(String image) {
