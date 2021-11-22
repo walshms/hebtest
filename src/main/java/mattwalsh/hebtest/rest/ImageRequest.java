@@ -1,9 +1,14 @@
-package mattwalsh.hebtest;
+package mattwalsh.hebtest.rest;
 
 public class ImageRequest {
 
     private boolean enableObjectDetection;
     private String image;
+
+    public ImageRequest(boolean enableObjectDetection, String image) {
+        this.enableObjectDetection = enableObjectDetection;
+        this.image = image;
+    }
 
     public boolean isEnableObjectDetection() {
         return enableObjectDetection;

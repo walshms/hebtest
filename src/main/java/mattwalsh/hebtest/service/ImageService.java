@@ -1,5 +1,9 @@
-package mattwalsh.hebtest;
+package mattwalsh.hebtest.service;
 
+import mattwalsh.hebtest.database.ImageRepository;
+import mattwalsh.hebtest.database.ImageEntity;
+import mattwalsh.hebtest.rest.ImageRequest;
+import mattwalsh.hebtest.rest.ImageResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,12 +14,7 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.Base64;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @Component
 public class ImageService {
@@ -26,23 +25,26 @@ public class ImageService {
     @Autowired
     private final ObjectDetectionService objectDetectionService;
 
-    public ImageService(ObjectDetectionService objectDetectionService) {
+    @Autowired
+    private final ImageRepository imageRepository;
+
+    public ImageService(ObjectDetectionService objectDetectionService, ImageRepository imageRepository) {
         this.objectDetectionService = objectDetectionService;
+        this.imageRepository = imageRepository;
     }
 
-    private final Map<UUID, ImageEntity> tempMap = new HashMap<>();
-
     public List<ImageResponse> getAllImages() {
-        return tempMap.values().stream().map(ImageEntity::asImageResponse).toList();
+        return imageRepository.findAll().stream().map(ImageEntity::asImageResponse).toList();
+    }
+
+    public List<ImageResponse> getAllImagesByObject(String[] objects) {
+        return null;
     }
 
     public ImageResponse getImageById(UUID imageId) {
-        ImageEntity image = tempMap.get(imageId);
-        if (image != null) {
-            return image.asImageResponse();
-        } else {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+        return imageRepository.findById(imageId)
+                .map(ImageEntity::asImageResponse)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
 
@@ -57,16 +59,15 @@ public class ImageService {
                 label,
                 detectedObjects
         );
-        this.tempMap.put(newEntity.id, newEntity);
-        return newEntity.asImageResponse();
+        return this.imageRepository.save(newEntity).asImageResponse();
     }
-
     // todo finish this
+
     private String getLabel(ImageRequest imageRequest) {
         return "IMAGE" + System.currentTimeMillis();
     }
-
     // todo finish this
+
     private String[] getDetectedObjectsIfEnabled(ImageRequest imageRequest) {
         return DEFAULT_DETECTED_OBJECTS;
     }
@@ -80,7 +81,7 @@ public class ImageService {
     private Optional<byte[]> imageAsFile(String image) {
         try {
             return Optional.of(Base64.getDecoder().decode(image));
-        } catch (IllegalArgumentException e){
+        } catch (IllegalArgumentException e) {
             return Optional.empty();
         }
     }
@@ -95,5 +96,4 @@ public class ImageService {
             return Optional.empty();
         }
     }
-
 }
