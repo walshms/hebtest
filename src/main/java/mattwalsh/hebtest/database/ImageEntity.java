@@ -1,5 +1,6 @@
 package mattwalsh.hebtest.database;
 
+import mattwalsh.hebtest.ChecksumUtil;
 import mattwalsh.hebtest.rest.ImageResponse;
 
 import javax.persistence.*;
@@ -26,24 +27,14 @@ public class ImageEntity {
     public ImageEntity() {
     }
 
-    public ImageEntity(UUID id, byte[] imageData, String label, String[] detectedObjects) {
+    public ImageEntity(UUID id, byte[] imageData, String checksum, String label, String[] detectedObjects) {
         this.id = id;
         this.imageData = imageData;
-        this.imageDataChecksum = getChecksum(imageData);
+        this.imageDataChecksum = checksum;
         this.label = label;
         this.detectedObjects = Arrays.stream(detectedObjects)
                 .map(DetectedObjectEntity::new)
                 .toList();
-    }
-
-    private String getChecksum(byte[] imageData) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("MD5");
-            md.update(imageData);
-            return DatatypeConverter.printHexBinary(md.digest()).toUpperCase();
-        } catch (NoSuchAlgorithmException e) {
-            throw new IllegalArgumentException("");
-        }
     }
 
     public ImageResponse asImageResponse() {
