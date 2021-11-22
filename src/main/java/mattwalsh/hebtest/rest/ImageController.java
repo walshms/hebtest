@@ -1,5 +1,6 @@
-package mattwalsh.hebtest;
+package mattwalsh.hebtest.rest;
 
+import mattwalsh.hebtest.service.ImageService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-// todo specify json for return types
 public class ImageController {
 
     private static final Logger logger = LoggerFactory.getLogger(ImageController.class);
@@ -31,6 +31,11 @@ public class ImageController {
     @GetMapping(value = "/images")
     public List<ImageResponse> getAllImages() {
         return this.imageService.getAllImages();
+    }
+
+    @GetMapping(value = "/images?objects={objects}")
+    public List<ImageResponse> getAllImagesByObject(@RequestParam(name = "objects") String[] objects) {
+        return this.imageService.getAllImagesByObject(objects);
     }
 
     @GetMapping(value = "/images/{imageId}")
