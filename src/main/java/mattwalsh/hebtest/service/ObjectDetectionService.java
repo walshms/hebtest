@@ -1,4 +1,4 @@
-package mattwalsh.hebtest;
+package mattwalsh.hebtest.service;
 
 public interface ObjectDetectionService {
 
