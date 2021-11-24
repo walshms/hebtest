@@ -1,0 +1,17 @@
+### POST localhost:8080/images
+
+payloads should be of the form:
+```json
+{
+    "enableObjectDetection": true,
+    "image": "https://imagga.com/static/images/tagging/wolf-725380_640.jpg"
+}
+```
+ or
+
+```json
+{
+    "enableObjectDetection": true,
+    "image": "https://imagga.com/static/images/tagging/wolf-725380_640.jpg"
+}
+```
