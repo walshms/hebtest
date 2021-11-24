@@ -20,7 +20,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 @ActiveProfiles("test")
 @SpringBootTest
-class HebtestApplicationTests {
+class UploadTests {
 
     @Autowired
     ImageController imageController;
@@ -28,9 +28,9 @@ class HebtestApplicationTests {
     @Autowired
     ObjectDetectionService objectDetectionService;
 
-    private final static String validImageFile = "https://www.google.com/images/branding/googlelogo/2x/googlelogo_light_color_272x92dp.png";
-    private final static String validImageFileChecksum = "354C465D4DD665D5E0D9E1840D6E516A";
-    private final static int validImageFileSize = 7108;
+    private final static String validImageFile = "https://imagga.com/static/images/tagging/wolf-725380_640.jpg";
+    private final static String validImageFileChecksum = "CA921455A98F4A4C02E4D0F192C307D4";
+    private final static int validImageFileSize = 71913;
 
     enum UploadTestParam {
         // user label is provided
