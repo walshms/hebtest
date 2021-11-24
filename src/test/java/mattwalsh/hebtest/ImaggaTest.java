@@ -24,13 +24,13 @@ public class ImaggaTest {
     public void setup() throws IOException {
         InputStream inputStream = new FileInputStream(new ClassPathResource("./wind-farm.jpg").getFile());
         BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-        byteArray = Base64.getEncoder().encode(IOUtils.toByteArray(bufferedInputStream));
+        byteArray = IOUtils.toByteArray(bufferedInputStream);
     }
 
     @Test
     public void testImaggaTagging() {
         Optional<List<String>> strings = imaggaObjectDetectionService.detectObjects(byteArray);
-//        LOG.info("received: " + strings.orElse(Collections.emptyList()));
+        System.out.println(("received: " + strings.orElse(Collections.emptyList())));
     }
 
 }
