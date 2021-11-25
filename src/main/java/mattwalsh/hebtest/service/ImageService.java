@@ -1,11 +1,13 @@
 package mattwalsh.hebtest.service;
 
-import mattwalsh.hebtest.ChecksumUtil;
 import mattwalsh.hebtest.database.ImageEntity;
 import mattwalsh.hebtest.database.ImageRepository;
+import mattwalsh.hebtest.rest.ImageController;
 import mattwalsh.hebtest.rest.ImageRequest;
 import mattwalsh.hebtest.rest.ImageResponse;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -20,6 +22,7 @@ import java.util.*;
 
 @Component
 public class ImageService {
+    private static final Logger logger = LoggerFactory.getLogger(ImageService.class);
 
     @Autowired
     private final ObjectDetectionService objectDetectionService;
@@ -49,7 +52,8 @@ public class ImageService {
 
     public ImageResponse processImageRequest(ImageRequest imageRequest) {
         byte[] imageData = getBytesOrFail(imageRequest.image());
-        List<String> detectedObjects = getDetectedObjectsIfEnabled(imageRequest.enableObjectDetection(), imageData);
+        boolean enableObjectDetection = imageRequest.enableObjectDetection();
+        List<String> detectedObjects = getDetectedObjectsIfEnabled(enableObjectDetection, imageData);
         ImageEntity newEntity = new ImageEntity(
                 imageData,
                 imageRequest.label(),
@@ -70,15 +74,24 @@ public class ImageService {
     }
 
     private byte[] getBytesOrFail(String image) {
-        return imageAsFile(image)
-                .orElse(imageFromUrl(image)
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.BAD_REQUEST)));
+        Optional<byte[]> bytesAsFile = imageAsFile(image);
+        if(bytesAsFile.isPresent()){
+            return bytesAsFile.get();
+        }
+
+        Optional<byte[]> bytesFromUrl = imageFromUrl(image);
+        if(bytesFromUrl.isPresent()){
+            return bytesFromUrl.get();
+        }
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
     }
 
     private Optional<byte[]> imageAsFile(String image) {
         try {
-            return Optional.of(Base64.getDecoder().decode(image));
+            byte[] decode = Base64.getDecoder().decode(image);
+            return Optional.of(decode);
         } catch (IllegalArgumentException e) {
+            logger.error(String.format("could not decode as file: %s", image), e);
             return Optional.empty();
         }
     }
@@ -90,6 +103,7 @@ public class ImageService {
             byte[] byteArray = IOUtils.toByteArray(bufferedInputStream);
             return Optional.of(byteArray);
         } catch (IOException e) {
+            logger.error(String.format("could not retrieve from URL: %s", image), e);
             return Optional.empty();
         }
     }
