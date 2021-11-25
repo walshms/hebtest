@@ -18,7 +18,7 @@ public class ImageEntity {
     private byte[] imageData;
     private String imageDataChecksum;
     private String label;
-    @ElementCollection(targetClass=String.class)
+    @ElementCollection(targetClass = String.class)
     @CollectionTable()
     private List<String> detectedObjects;
 
@@ -29,13 +29,21 @@ public class ImageEntity {
         this.id = UUID.randomUUID();
         this.imageData = imageData;
         this.imageDataChecksum = ChecksumUtil.getChecksum(imageData);
-        this.label = getLabel(imageLabel, detectedObjects, this.imageDataChecksum);
+        this.label = getLabel(imageLabel, detectedObjects);
         this.detectedObjects = detectedObjects;
     }
 
+    public ImageResponse asImageResponse() {
+        return new ImageResponse(
+                this.id,
+                this.imageDataChecksum,
+                this.label,
+                this.detectedObjects
+        );
+    }
+
     private String getLabel(String label,
-                            List<String> detectedObjects,
-                            String checksum) {
+                            List<String> detectedObjects) {
         if (StringUtils.hasText(label)) {
             return label;
         }
@@ -43,16 +51,6 @@ public class ImageEntity {
                 .map(String::trim)
                 .filter(StringUtils::hasText)
                 .findFirst()
-                .orElse(checksum);
-    }
-
-    public ImageResponse asImageResponse() {
-        return new ImageResponse(
-                this.id,
-                this.imageData,
-                this.imageDataChecksum,
-                this.label,
-                this.detectedObjects
-        );
+                .orElse(this.imageDataChecksum);
     }
 }
