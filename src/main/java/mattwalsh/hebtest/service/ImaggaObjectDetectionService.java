@@ -63,17 +63,16 @@ public class ImaggaObjectDetectionService implements ObjectDetectionService {
             @JsonProperty("type") String type) {
     }
     public ImaggaObjectDetectionService() {
-        Authenticator authenticator = new Authenticator() {
-            @Override
-            protected PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(API_KEY, API_SECRET.toCharArray());
-            }
-        };
         client = Methanol.newBuilder()
                 .version(HttpClient.Version.HTTP_1_1)
                 .followRedirects(HttpClient.Redirect.NORMAL)
                 .connectTimeout(Duration.ofSeconds(30))
-                .authenticator(authenticator)
+                .authenticator(new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(API_KEY, API_SECRET.toCharArray());
+                    }
+                })
                 .build();
     }
 
