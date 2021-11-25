@@ -82,9 +82,9 @@ class UploadTests {
 
         ImageResponse imageResponse = imageController.postImage(imageRequest);
 
-        assertThat(imageResponse.label).isEqualTo(param.labelExpected);
-        assertThat(imageResponse.imageData.length).isEqualTo(validImageFileSize);
-        assertThat(imageResponse.imageDataChecksum).isEqualTo(validImageFileChecksum);
+        assertThat(imageResponse.label()).isEqualTo(param.labelExpected);
+        assertThat(imageResponse.imageData().length).isEqualTo(validImageFileSize);
+        assertThat(imageResponse.imageDataChecksum()).isEqualTo(validImageFileChecksum);
     }
 
 }
