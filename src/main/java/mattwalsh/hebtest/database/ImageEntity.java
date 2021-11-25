@@ -14,12 +14,13 @@ public class ImageEntity {
 
     @Id
     @Column(name = "id", nullable = false)
-    public UUID id;
-    public byte[] imageData;
-    public String imageDataChecksum;
-    public String label;
-    @ManyToMany(cascade = CascadeType.ALL)
-    public List<DetectedObjectEntity> detectedObjects;
+    private UUID id;
+    private byte[] imageData;
+    private String imageDataChecksum;
+    private String label;
+    @ElementCollection(targetClass=String.class)
+    @CollectionTable()
+    private List<String> detectedObjects;
 
     public ImageEntity() {
     }
@@ -29,9 +30,7 @@ public class ImageEntity {
         this.imageData = imageData;
         this.imageDataChecksum = ChecksumUtil.getChecksum(imageData);
         this.label = getLabel(imageLabel, detectedObjects, this.imageDataChecksum);
-        this.detectedObjects = detectedObjects.stream()
-                .map(DetectedObjectEntity::new)
-                .toList();
+        this.detectedObjects = detectedObjects;
     }
 
     private String getLabel(String label,
@@ -53,9 +52,7 @@ public class ImageEntity {
                 this.imageData,
                 this.imageDataChecksum,
                 this.label,
-                this.detectedObjects.stream()
-                        .map(DetectedObjectEntity::getName)
-                        .toList()
+                this.detectedObjects
         );
     }
 }
