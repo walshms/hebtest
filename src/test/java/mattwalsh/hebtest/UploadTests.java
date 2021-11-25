@@ -30,7 +30,6 @@ class UploadTests {
 
     private final static String validImageFile = "https://imagga.com/static/images/tagging/wolf-725380_640.jpg";
     private final static String validImageFileChecksum = "CA921455A98F4A4C02E4D0F192C307D4";
-    private final static int validImageFileSize = 71913;
 
     enum UploadTestParam {
         // user label is provided
@@ -83,8 +82,8 @@ class UploadTests {
         ImageResponse imageResponse = imageController.postImage(imageRequest);
 
         assertThat(imageResponse.label()).isEqualTo(param.labelExpected);
-        assertThat(imageResponse.imageData().length).isEqualTo(validImageFileSize);
         assertThat(imageResponse.imageDataChecksum()).isEqualTo(validImageFileChecksum);
+        // todo assert tags here
     }
 
 }
