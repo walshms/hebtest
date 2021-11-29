@@ -7,11 +7,5 @@ payloads should be of the form:
     "image": "https://imagga.com/static/images/tagging/wolf-725380_640.jpg"
 }
 ```
- or
+where image can either be the URL, or base 64 encoding of an image
 
-```json
-{
-    "enableObjectDetection": true,
-    "image": "https://imagga.com/static/images/tagging/wolf-725380_640.jpg"
-}
-```
