@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.*;
+import java.util.stream.StreamSupport;
 
 @Component
 public class ImageService {
@@ -40,7 +41,8 @@ public class ImageService {
     }
 
     public List<ImageResponse> getAllImagesByObject(String[] objects) {
-        return null;
+        return imageRepository.findAllByDetectedObjects(objects);
+//        throw new UnsupportedOperationException();
     }
 
     public ImageResponse getImageById(UUID imageId) {
@@ -58,12 +60,14 @@ public class ImageService {
                 imageData,
                 imageRequest.label(),
                 detectedObjects);
-        return this.imageRepository.save(newEntity).asImageResponse();
+        ImageEntity savedImage = this.imageRepository.save(newEntity);
+        return savedImage.asImageResponse();
     }
 
     private List<String> getDetectedObjectsIfEnabled(boolean enableObjectDetection, byte[] imageData) {
         if (enableObjectDetection) {
-            return objectDetectionService.detectObjects(imageData)
+            return objectDetectionService
+                    .detectObjects(imageData)
                     .map(stringList -> stringList.stream()
                             .map(String::trim)
                             .filter(StringUtils::hasText)
@@ -75,12 +79,12 @@ public class ImageService {
 
     private byte[] getBytesOrFail(String image) {
         Optional<byte[]> bytesAsFile = imageAsFile(image);
-        if(bytesAsFile.isPresent()){
+        if (bytesAsFile.isPresent()) {
             return bytesAsFile.get();
         }
 
         Optional<byte[]> bytesFromUrl = imageFromUrl(image);
-        if(bytesFromUrl.isPresent()){
+        if (bytesFromUrl.isPresent()) {
             return bytesFromUrl.get();
         }
         throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
@@ -91,7 +95,7 @@ public class ImageService {
             byte[] decode = Base64.getDecoder().decode(image);
             return Optional.of(decode);
         } catch (IllegalArgumentException e) {
-            logger.error(String.format("could not decode as file: %s", image), e);
+//            logger.error(String.format("could not decode image as file: %s", image), e);
             return Optional.empty();
         }
     }
@@ -103,7 +107,7 @@ public class ImageService {
             byte[] byteArray = IOUtils.toByteArray(bufferedInputStream);
             return Optional.of(byteArray);
         } catch (IOException e) {
-            logger.error(String.format("could not retrieve from URL: %s", image), e);
+//            logger.error(String.format("could not retrieve image from URL: %s", image), e);
             return Optional.empty();
         }
     }

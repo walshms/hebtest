@@ -15,8 +15,11 @@ public class ImageEntity {
     @Id
     @Column(name = "id", nullable = false)
     private UUID id;
+    @Column(name = "image_data")
     private byte[] imageData;
+    @Column(name = "image_data_checksum")
     private String imageDataChecksum;
+    @Column(name = "label")
     private String label;
     @ElementCollection(targetClass = String.class)
     @CollectionTable()
